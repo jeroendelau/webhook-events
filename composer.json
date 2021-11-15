@@ -1,7 +1,12 @@
 {
     "name": "stareditions/webhook-event-server",
     "require": {
-        "php": "^8.0"
+        "php": "^8.0",
+        "spatie/laravel-webhook-server": "^3.1",
+        "illuminate/database": "^8.70",
+        "illuminate/support": "^8.70",
+        "illuminate/routing": "^8.70",
+        "illuminate/http": "^8.70"
     },
     "autoload": {
         "psr-4": {
