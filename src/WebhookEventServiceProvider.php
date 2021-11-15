@@ -2,11 +2,20 @@
 
 namespace StarEditions\WebhookEvent;
 
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use StarEditions\WebhookEvent\Models\Webhook;
+use StarEditions\WebhookEvent\Models\WebhookDeliveryLog;
+use StarEditions\WebhookEvent\Policies\WebhookDeliveryLogPolicy;
+use StarEditions\WebhookEvent\Policies\WebhookPolicy;
 
 class WebhookEventServiceProvider extends ServiceProvider
 {
+    protected $policies = [
+        Webhook::class => WebhookPolicy::class,
+        WebhookDeliveryLog::class => WebhookDeliveryLogPolicy::class
+    ];
     /**
      * Register any application services.
      *
@@ -27,9 +36,15 @@ class WebhookEventServiceProvider extends ServiceProvider
         $this->registerRoutes();
         $this->registerMigrations();
         $this->registerPublishing();
+        $this->registerPolicies();
         $this->loadRoutesFrom(__DIR__.'/routes/api.php');
     }
 
+    /**
+     * Register the package routes.
+     *
+     * @return void
+     */
     protected function registerRoutes()
     {
         Route::group([
@@ -40,6 +55,19 @@ class WebhookEventServiceProvider extends ServiceProvider
         ], function () {
             $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
         });
+    }
+
+    /**
+     * Register the package policies.
+     *
+     * @return void
+     */
+
+    protected function registerPolicies()
+    {
+        foreach ($this->policies as $key => $value) {
+            Gate::policy($key, $value);
+        }
     }
 
     /**
