@@ -22,4 +22,9 @@ class Webhook extends Model
     {
         return $this->hasMany(WebhookDispatch::class);
     }
+
+    public function owner()
+    {
+        return $this->morphTo(__FUNCTION__, 'owner_type', 'owner_id');
+    }
 }
