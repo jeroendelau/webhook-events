@@ -11,7 +11,15 @@ trait HasWebhooks
 
     public function getWebhookScope()
     {
-        return "store.{$this->id}";
+        return "{$this->getModelName()}.{$this->id}";
+    }
+
+    private function getModelName()
+    {
+        $className = get_class($this);
+        $className = explode('\\', $className);
+        $modelName = $className[count($className) - 1];
+        return $modelName;
     }
 
     public function setWebhookSigningSecret($apiSecret)
