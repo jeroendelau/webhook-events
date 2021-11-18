@@ -14,7 +14,7 @@ class CreateWebhookDeliveryLogsTable extends Migration
     public function up()
     {
         Schema::create('webhook_delivery_logs', function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->foreignId('webhook_event_id')
             ->nullable()
             ->constrained('webhook_dispatches')

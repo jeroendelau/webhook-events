@@ -14,7 +14,7 @@ class CreateWebhookDispatchesTable extends Migration
     public function up()
     {
         Schema::create('webhook_dispatches', function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->foreignId('webhook_id')
             ->nullable()
             ->constrained('webhooks')
