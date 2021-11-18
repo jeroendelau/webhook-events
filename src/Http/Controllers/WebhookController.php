@@ -5,6 +5,8 @@ namespace StarEditions\WebhookEvent\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use StarEditions\WebhookEvent\Models\Webhook;
+use StarEditions\WebhookEvent\Http\Resources\WebhookResource;
+use StarEditions\WebhookEvent\Requests\WebhookRequest;
 
 class WebhookController
 {
@@ -17,28 +19,42 @@ class WebhookController
         }
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        # code ...
+        $webhooks = Webhook::paginate();
+        return WebhookResource::collection($webhooks);
     }
 
-    public function create(Request $request)
+    public function create(WebhookRequest $request)
     {
-        # code ...
+        $data = $request->validated();
+        $data['scope'] = Auth::user()->getWebhookScope();
+        Auth::user()->webhooks()->save($data);
+        return response()->json([
+            'status' => 'ok'
+        ]);
     }
 
-    public function show($id)
+    public function show(Webhook $webhook)
     {
-        # code ...
+        return new WebhookResource($webhook);
     }
 
-    public function update(Request $request, $id)
+    public function update(WebhookRequest $request, Webhook $webhook)
     {
-        # code ...
+        $data = $request->validated();
+        $data['scope'] = Auth::user()->getWebhookScope();
+        $webhook->update($data);
+        return response()->json([
+            'status' => 'ok'
+        ]);
     }
 
-    public function delete($id)
+    public function delete(Webhook $webhook)
     {
-        # code ...
+        $webhook->delete();
+        return response()->json([
+            'status' => 'ok'
+        ]);
     }
 }
