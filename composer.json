@@ -13,5 +13,17 @@
         "psr-4": {
             "StarEditions\\WebhookEvent\\": "src"
         }
-    }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "StarEditions\\WebhookEvent\\WebhookEventServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
