@@ -35,7 +35,7 @@ class WebhookEventServiceProvider extends ServiceProvider
     protected function registerMigrations()
     {
         if (Webhook::$runsMigrations && $this->app->runningInConsole()) {
-            $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+            $this->loadMigrationsFrom(__DIR__.'/database/migrations');
         }
     }
 
@@ -43,11 +43,11 @@ class WebhookEventServiceProvider extends ServiceProvider
     {
         if($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../database/migrations' => $this->app->databasePath('migrations'),
+                __DIR__.'/database/migrations' => $this->app->databasePath('migrations'),
             ], 'webhook-migrations');
     
             $this->publishes([
-                __DIR__.'/../config/webhook-events-server.php' => $this->app->configPath('webhook-events-server.php'),
+                __DIR__.'/config/webhook-events-server.php' => $this->app->configPath('webhook-events-server.php'),
             ], 'webhook-config');
         }
     }
