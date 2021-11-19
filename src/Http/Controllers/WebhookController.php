@@ -21,7 +21,15 @@ class WebhookController
 
     public function index(Request $request)
     {
-        $webhooks = Webhook::paginate();
+        $webhooks = Webhook::webhookOwner(Auth::user()->getWebhookOwner())
+        ->url($request->url)
+        ->topic($request->topic)
+        ->createdAt($request->created_at)
+        ->enabled($request->enabled)
+        ->when($request->sort, function($sortQuery, $sort) use($request) {
+            $sortQuery->orderBy($sort, $request->order ?? 'ASC');
+        })
+        ->paginate();
         return WebhookResource::collection($webhooks);
     }
 
@@ -29,7 +37,9 @@ class WebhookController
     {
         $data = $request->validated();
         $data['scope'] = Auth::user()->getWebhookScope();
-        Auth::user()->webhooks()->save($data);
+        $data['owner_id'] = Auth::user()->getWebhookOwner()->id;
+        $data['owner_type'] = get_class(Auth::user()->getWebhookOwner());
+        Webhook::create($data);
         return response()->json([
             'status' => 'ok'
         ]);
