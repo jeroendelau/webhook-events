@@ -16,10 +16,10 @@ trait HasWebhooks
 
     private function getModelName()
     {
-        $className = get_class($this);
+        $className = get_class($this->getWebhookOwner());
         $className = explode('\\', $className);
         $modelName = $className[count($className) - 1];
-        return $modelName;
+        return strtolower($modelName);
     }
 
     public function setWebhookSigningSecret($apiSecret)
