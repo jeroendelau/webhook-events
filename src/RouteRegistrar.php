@@ -31,11 +31,11 @@ class RouteRegistrar
             'uses' => 'WebhookEventController@index',
             'as' => 'webhook-event.index'
         ]);
-        $this->router->get('webhook/event/{id}', [
+        $this->router->get('webhook/event/{webhook_event}', [
             'uses' => 'WebhookEventController@show',
             'as' => 'webhook-event.show'
         ]);
-        $this->router->get('webhook/event/{id}/log', [
+        $this->router->get('webhook/event/{webhook_event}/log', [
             'uses' => 'WebhookEventController@logs',
             'as' => 'webhook-event.logs'
         ]);
