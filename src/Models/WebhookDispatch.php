@@ -15,6 +15,10 @@ class WebhookDispatch extends Model
         'attempts'
     ];
 
+    protected $casts = [
+        'payload' => 'json'
+    ];
+
     public function webhook()
     {
         return $this->belongsTo(Webhook::class);
