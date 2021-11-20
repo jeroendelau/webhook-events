@@ -30,4 +30,9 @@ trait HasWebhooks
     public function getWebhookSigningSecret(){
         return $this->apiSecret;
     }
+
+    public function webhooks()
+    {
+        return $this->morphToMany(Webhook::class, 'owner');
+    }
 }
