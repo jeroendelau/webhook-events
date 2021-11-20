@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use StarEditions\WebhookEvent\Http\Resources\WebhookDispatchResource;
 use StarEditions\WebhookEvent\Http\Resources\WebhookLogResource;
 use StarEditions\WebhookEvent\Models\WebhookDispatch;
+use StarEditions\WebhookEvent\HasWebhooks;
 
 class WebhookEventController
 {
@@ -15,6 +16,10 @@ class WebhookEventController
         if(!Auth::check()) {
             return response()->json([
                 'message' => 'Unauthenticated'
+            ], 401);
+        }elseif (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
+            return response()->json([
+                'message' => 'Access denied'
             ], 401);
         }
     }
