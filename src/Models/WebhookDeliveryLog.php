@@ -13,6 +13,8 @@ class WebhookDeliveryLog extends Model
         'sent_at'
     ];
 
+    public $timestamps = false;
+
     protected $casts = [
         'sent_at' => 'timestamp'
     ];

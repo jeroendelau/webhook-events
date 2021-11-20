@@ -23,7 +23,6 @@ class CreateWebhookDeliveryLogsTable extends Migration
             $table->string('response_status');
             $table->text('response_message');
             $table->timestamp('sent_at');
-            $table->timestamps();
         });
     }
 
