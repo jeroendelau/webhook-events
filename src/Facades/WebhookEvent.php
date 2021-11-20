@@ -5,7 +5,10 @@ namespace StarEditions\WebhookEvent\Facades;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Facade;
 use Spatie\WebhookServer\WebhookCall;
+use StarEditions\WebhookEvent\MightOverWriteScope;
 use StarEditions\WebhookEvent\Models\Webhook;
+use StarEditions\WebhookEvent\Models\WebhookDispatch;
+use StarEditions\WebhookEvent\ProvidesWebhookOwner;
 
 class WebhookEvent extends Facade
 {
@@ -47,13 +50,36 @@ class WebhookEvent extends Facade
 
     public function dispatch()
     {
-        // $webhooks = Webhook::webhookOwner(Auth::user()->getWebhookOwner())
-        // ->topic($this->topic)->get();
-        // foreach ($webhooks as $webhook) {
-        //     $response = WebhookCall::create()
-        //     ->url($webhook->url)
-        //     ->payload($this->payload)
-        //     ->dispatch();
-        // }
+        $query = Webhook::query();
+        
+        if(Auth::user() instanceof ProvidesWebhookOwner) {
+            $query->webhookOwner(Auth::user()->getWebhookOwner());
+        }else {
+            $query->webhookOwner(Auth::user());
+        }
+
+        if(!(Auth::user() instanceof MightOverWriteScope)) {
+            $query->where('scope', $this->scope);
+        }
+
+        $webhooks = $query->topic($this->topic)
+        ->get();
+
+        foreach ($webhooks as $webhook) {
+            $dispatch = WebhookDispatch::create([
+                'webhook_id' => $webhook->id,
+                'topic' => $this->topic,
+                'payload' => $this->payload,
+            ]);
+            WebhookCall::create()
+            ->meta([
+                'dispatch' => $dispatch->id
+            ])
+            ->maximumTries(5)
+            ->useSecret(Auth::user()->getWebhookSigningSecret())
+            ->url($webhook->url)
+            ->payload($this->payload)
+            ->dispatch();
+        }
     }
 }
