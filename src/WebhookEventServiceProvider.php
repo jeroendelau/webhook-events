@@ -52,9 +52,9 @@ class WebhookEventServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/database/migrations' => $this->app->databasePath('migrations'),
             ], 'webhook-migrations');
-    
+
             $this->publishes([
-                __DIR__.'/config/webhook-events-server.php' => $this->app->configPath('webhook-events-server.php'),
+                dirname(__DIR__).'/config/webhook-events-server.php' => $this->app->configPath('webhook-events-server.php'),
             ], 'webhook-config');
         }
     }
