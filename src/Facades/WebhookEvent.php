@@ -52,6 +52,7 @@ class WebhookEvent extends Facade
     {
         $webhooks = Webhook::where('scope', $this->scope)
         ->topic($this->topic)
+        ->where('enabled', 1)
         ->get();
 
         foreach ($webhooks as $webhook) {
@@ -60,13 +61,17 @@ class WebhookEvent extends Facade
                 'topic' => $this->topic,
                 'payload' => $this->payload,
             ]);
-            WebhookCall::create()
+            $webhookCall = WebhookCall::create()
             ->meta([
                 'dispatch' => $dispatch->id
             ])
-            ->maximumTries(5)
-            ->useSecret(Auth::user()->getWebhookSigningSecret())
-            ->url($webhook->url)
+            ->maximumTries(5);
+            if(app()->runningInConsole()) {
+                $webhookCall->doNotSign();
+            }else {
+                $webhookCall->useSecret(Auth::user()->getWebhookSigningSecret());
+            }
+            $webhookCall->url($webhook->url)
             ->payload($this->payload)
             ->dispatch();
         }
