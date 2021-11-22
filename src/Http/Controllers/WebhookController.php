@@ -6,27 +6,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use StarEditions\WebhookEvent\Models\Webhook;
 use StarEditions\WebhookEvent\Http\Resources\WebhookResource;
-use StarEditions\WebhookEvent\Requests\WebhookRequest;
+use StarEditions\WebhookEvent\Http\Requests\WebhookRequest;
 use StarEditions\WebhookEvent\HasWebhooks;
 use StarEditions\WebhookEvent\ProvidesWebhookOwner;
 
-class WebhookController
+class WebhookController extends Controller
 {
-    public function __construct()
-    {
-        if(!Auth::check()) {
-            return response()->json([
-                'message' => 'Unauthenticated'
-            ], 401);
-        }elseif (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
-            return response()->json([
-                'message' => 'Access denied'
-            ], 401);
-        }
-    }
-
     public function index(Request $request)
     {
+        if (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
+            abort(401, 'Access denied');
+        }
+
         $query = Webhook::query();
         if(Auth::user() instanceof ProvidesWebhookOwner) {
             $query->webhookOwner(Auth::user()->getWebhookOwner());
@@ -46,12 +37,22 @@ class WebhookController
 
     public function store(WebhookRequest $request)
     {
+        if (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
+            abort(401, 'Access denied');
+        }
         $data = $request->validated();
         if(!method_exists(Auth::user(), 'canOverwriteScope')) {
             $data['scope'] = Auth::user()->getWebhookScope();
         }
-        $data['owner_id'] = Auth::user()->getWebhookOwner()->id;
-        $data['owner_type'] = get_class(Auth::user()->getWebhookOwner());
+        if((Auth::user() instanceof ProvidesWebhookOwner)) {
+            
+            $data['owner_id'] = Auth::user()->getWebhookOwner()->id;
+            $data['owner_type'] = get_class(Auth::user()->getWebhookOwner());
+        }else {
+            $data['owner_id'] = Auth::id();
+            $data['owner_type'] = get_class(Auth::user());
+        }
+        
         Webhook::create($data);
         return response()->json([
             'status' => 'ok'

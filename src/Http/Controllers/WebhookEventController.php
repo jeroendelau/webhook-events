@@ -9,23 +9,15 @@ use StarEditions\WebhookEvent\Http\Resources\WebhookLogResource;
 use StarEditions\WebhookEvent\Models\WebhookDispatch;
 use StarEditions\WebhookEvent\HasWebhooks;
 
-class WebhookEventController
+class WebhookEventController extends Controller
 {
-    public function __construct()
-    {
-        if(!Auth::check()) {
-            return response()->json([
-                'message' => 'Unauthenticated'
-            ], 401);
-        }elseif (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
-            return response()->json([
-                'message' => 'Access denied'
-            ], 401);
-        }
-    }
 
     public function index(Request $request)
     {
+        if (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
+            abort(401, 'Access denied');
+        }
+
         $query = WebhookDispatch::query();
         $query->whereHas('webhook', function($webhookQuery) {
             $webhookQuery->where('owner_id', Auth::id())
@@ -40,11 +32,19 @@ class WebhookEventController
 
     public function show(WebhookDispatch $webhookDispatch)
     {
+        if (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
+            abort(401, 'Access denied');
+        }
+
         return new WebhookDispatchResource($webhookDispatch);
     }
 
     public function log(WebhookDispatch $webhookDispatch)
     {
+        if (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
+            abort(401, 'Access denied');
+        }
+        
         $log = $webhookDispatch->log()
         ->latest('sent_at')
         ->get();
