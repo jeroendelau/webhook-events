@@ -16,7 +16,12 @@ trait HasWebhooks
 
     private function getModelName()
     {
-        $className = get_class($this->getWebhookOwner());
+        if($this instanceof ProvidesWebhookOwner) {
+            $className = get_class($this->getWebhookOwner());
+        }else {
+            $className = get_class($this);
+        }
+        
         $className = explode('\\', $className);
         $modelName = $className[count($className) - 1];
         return strtolower($modelName);
