@@ -44,7 +44,7 @@ class WebhookController
         return WebhookResource::collection($webhooks);
     }
 
-    public function create(WebhookRequest $request)
+    public function store(WebhookRequest $request)
     {
         $data = $request->validated();
         if(!method_exists(Auth::user(), 'canOverwriteScope')) {
