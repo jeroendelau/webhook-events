@@ -21,7 +21,7 @@ class CreateWebhookDeliveryLogsTable extends Migration
             ->cascadeOnUpdate()
             ->cascadeOnDelete();
             $table->string('response_status');
-            $table->text('response_message');
+            $table->longText('response_message');
             $table->timestamp('sent_at');
         });
     }
