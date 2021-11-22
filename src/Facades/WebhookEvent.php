@@ -50,19 +50,8 @@ class WebhookEvent extends Facade
 
     public function dispatch()
     {
-        $query = Webhook::query();
-        
-        if(Auth::user() instanceof ProvidesWebhookOwner) {
-            $query->webhookOwner(Auth::user()->getWebhookOwner());
-        }else {
-            $query->webhookOwner(Auth::user());
-        }
-
-        if(!(Auth::user() instanceof MightOverWriteScope)) {
-            $query->where('scope', $this->scope);
-        }
-
-        $webhooks = $query->topic($this->topic)
+        $webhooks = Webhook::where('scope', $this->scope)
+        ->topic($this->topic)
         ->get();
 
         foreach ($webhooks as $webhook) {
