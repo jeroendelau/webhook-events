@@ -1,6 +1,6 @@
 <?php
 
-namespace StarEditions\WebhookEvent\Requests;
+namespace StarEditions\WebhookEvent\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -27,7 +27,7 @@ class WebhookRequest extends FormRequest
         return [
             'topic' => ['required', Rule::in(config('webhook-events-server.topics'))],
             'url' => ['required', 'url'],
-            'enable' => ['required', 'boolean']
+            'enabled' => ['required', 'boolean']
         ];
     }
 }
