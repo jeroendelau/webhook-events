@@ -27,7 +27,7 @@ class WebhookRequest extends FormRequest
         return [
             'topic' => ['required', Rule::in(config('webhook-events-server.topics'))],
             'url' => ['required', 'url'],
-            'sometimes' => ['required', 'boolean']
+            'enabled' => ['sometimes', 'boolean']
         ];
     }
 }
