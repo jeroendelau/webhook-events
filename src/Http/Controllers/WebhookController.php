@@ -81,7 +81,7 @@ class WebhookController extends Controller
         ]);
     }
 
-    public function delete(Webhook $webhook)
+    public function destroy(Webhook $webhook)
     {
         $webhook->delete();
         return response()->json([
