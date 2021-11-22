@@ -8,6 +8,7 @@ use StarEditions\WebhookEvent\Models\Webhook;
 use StarEditions\WebhookEvent\Http\Resources\WebhookResource;
 use StarEditions\WebhookEvent\Http\Requests\WebhookRequest;
 use StarEditions\WebhookEvent\HasWebhooks;
+use StarEditions\WebhookEvent\MightOverWriteScope;
 use StarEditions\WebhookEvent\ProvidesWebhookOwner;
 
 class WebhookController extends Controller
@@ -41,7 +42,9 @@ class WebhookController extends Controller
             abort(401, 'Access denied');
         }
         $data = $request->validated();
-        if(!method_exists(Auth::user(), 'canOverwriteScope')) {
+        if(!(Auth::user() instanceof MightOverWriteScope)) {
+            $data['scope'] = Auth::user()->getWebhookScope();
+        }elseif(Auth::user() instanceof MightOverWriteScope && !$request->has('scope')) {
             $data['scope'] = Auth::user()->getWebhookScope();
         }
         if((Auth::user() instanceof ProvidesWebhookOwner)) {
@@ -67,7 +70,9 @@ class WebhookController extends Controller
     public function update(WebhookRequest $request, Webhook $webhook)
     {
         $data = $request->validated();
-        if(!method_exists(Auth::user(), 'canOverwriteScope')) {
+        if(!(Auth::user() instanceof MightOverWriteScope)) {
+            $data['scope'] = Auth::user()->getWebhookScope();
+        }elseif(Auth::user() instanceof MightOverWriteScope && !$request->has('scope')) {
             $data['scope'] = Auth::user()->getWebhookScope();
         }
         $webhook->update($data);
