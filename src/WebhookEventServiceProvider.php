@@ -63,11 +63,10 @@ class WebhookEventServiceProvider extends ServiceProvider
     {
         Event::listen(function(WebhookCallSucceededEvent $event) {
             $dispatch = WebhookDispatch::find($event->meta['dispatch']);
-            $count = WebhookDeliveryLog::where('dispatch_event_id', $dispatch->id)->count();
             $dispatch->update([
                 'last_attempt' => now(),
                 'success' => 1,
-                'attempts' => $count+1
+                'attempts' => $dispatch->attempts+1
             ]);
             WebhookDeliveryLog::create([
                 'webhook_event_id' => $dispatch->id,
@@ -78,6 +77,10 @@ class WebhookEventServiceProvider extends ServiceProvider
         });
         Event::listen(function(WebhookCallFailedEvent $event) {
             $dispatch = WebhookDispatch::find($event->meta['dispatch']);
+            $dispatch->update([
+                'success' => 0,
+                'attempts' => $dispatch->attempts+1
+            ]);
             WebhookDeliveryLog::create([
                 'webhook_event_id' => $dispatch->id,
                 'response_status' => $event->response->getStatusCode(),
@@ -87,11 +90,10 @@ class WebhookEventServiceProvider extends ServiceProvider
         });
         Event::listen(function(FinalWebhookCallFailedEvent $event) {
             $dispatch = WebhookDispatch::find($event->meta['dispatch']);
-            $count = WebhookDeliveryLog::where('dispatch_event_id', $dispatch->id)->count();
             $dispatch->update([
                 'last_attempt' => now(),
                 'success' => 0,
-                'attempts' => $count+1
+                'attempts' => $dispatch->attempts+1
             ]);
             WebhookDeliveryLog::create([
                 'webhook_event_id' => $dispatch->id,
