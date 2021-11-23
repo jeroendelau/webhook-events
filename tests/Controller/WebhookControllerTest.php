@@ -2,9 +2,7 @@
 
 namespace StarEditions\WebhookEvent\Tests\Controller;
 
-use Illuminate\Foundation\Auth\User;
 use Illuminate\Http\Request;
-use StarEditions\WebhookEvent\Http\Requests\WebhookRequest;
 use StarEditions\WebhookEvent\Http\Resources\WebhookResource;
 use StarEditions\WebhookEvent\Models\Webhook;
 use StarEditions\WebhookEvent\Tests\Fakes\UserThatProvidesWebhookOwner;

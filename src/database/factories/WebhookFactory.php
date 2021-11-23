@@ -20,6 +20,7 @@ class WebhookFactory extends Factory
             'owner_id' => $this->faker->name(),
             'owner_type' => $this->faker->unique()->safeEmail(),
             'url' => $this->faker->url(),
+            'enabled'=> 1,
             'topic' => 'something/random', // password
             'scope' => "scope",
         ];

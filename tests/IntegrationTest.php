@@ -3,8 +3,6 @@
 namespace Stareditions\WebhookEvent\Tests;
 
 use Orchestra\Testbench\TestCase;
-use StarEditions\WebhookEvent\Facades\WebhookEvent;
-use StarEditions\WebhookEvent\RouteRegistrar;
 use StarEditions\WebhookEvent\Webhook;
 
 abstract class IntegrationTest extends TestCase
@@ -45,7 +43,7 @@ abstract class IntegrationTest extends TestCase
     /**
      * Define routes setup.
      *
-     * @param  \Illuminate\Routing\Router  $router
+     * @param \Illuminate\Routing\Router $router
      *
      * @return void
      */
