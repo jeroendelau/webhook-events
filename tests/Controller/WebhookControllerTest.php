@@ -2,6 +2,10 @@
 
 namespace StarEditions\WebhookEvent\Tests\Controller;
 
+use Illuminate\Foundation\Auth\User;
+use Illuminate\Http\Request;
+use StarEditions\WebhookEvent\Http\Requests\WebhookRequest;
+use StarEditions\WebhookEvent\Http\Resources\WebhookResource;
 use StarEditions\WebhookEvent\Models\Webhook;
 use StarEditions\WebhookEvent\Tests\Fakes\UserThatProvidesWebhookOwner;
 use StarEditions\WebhookEvent\Tests\Fakes\UserWithWebhookAndCanOverrideScope;
@@ -9,6 +13,10 @@ use StarEditions\WebhookEvent\Tests\Fakes\UserWithWebhooks;
 
 class WebhookControllerTest extends AbstractControllerTest
 {
+    /**
+     * POST TESTS
+     * -------------
+     */
     public function testCanAttachToDefaultUser(){
         $response = $this->actingAs(new UserWithWebhooks())
             ->post('/webhook', [
@@ -151,5 +159,125 @@ class WebhookControllerTest extends AbstractControllerTest
             ], ["Accepts" => "application/json"]);
 
         $response->assertStatus(422);
+    }
+
+    /**
+     * GET TESTS
+     * -------------
+     */
+
+
+    public function testReturnsAListOfWebhooks(){
+        $user = new UserWithWebhooks();
+        Webhook::factory()->count(8)->create(['owner_id'=>'1', 'owner_type' => 'StarEditions\WebhookEvent\Tests\Fakes\UserWithWebhooks']);
+
+        $response = $this->actingAs($user)
+            ->get('/webhook', ["Accepts" => "application/json"]);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonCount(8, "data");
+    }
+
+    public function testOnlyReturnsWebhooksForOwner(){
+        $user = new UserWithWebhooks();
+        Webhook::factory()->count(6)->create(['owner_id'=>'1', 'owner_type' => 'StarEditions\WebhookEvent\Tests\Fakes\UserWithWebhooks']);
+        Webhook::factory()->count(5)->create(['owner_id'=>'2', 'owner_type' => 'StarEditions\WebhookEvent\Tests\Fakes\UserWithWebhooks']);
+
+        $response = $this->actingAs($user)
+            ->get('/webhook', ["Accepts" => "application/json"]);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonCount(6, "data");
+    }
+
+
+    public function testReturnsWebhooksForProvidedOwner(){
+        $user = new UserThatProvidesWebhookOwner();
+        Webhook::factory()->count(13)->create(['owner_id'=>'3', 'owner_type' => 'StarEditions\WebhookEvent\Tests\Fakes\EntityWithWebhooks']);
+
+        $response = $this->actingAs($user)
+            ->get('/webhook', ["Accepts" => "application/json"]);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonCount(13, "data");
+    }
+
+    # todo: paging etc ...
+
+    /**
+     * DELETE TESTS
+     * -------------
+     */
+    public function testDelete(){
+        $user = new UserWithWebhooks();
+        $wh = Webhook::factory()->createOne(['owner_id'=>$user->id, 'owner_type' => 'StarEditions\WebhookEvent\Tests\Fakes\UserWithWebhooks']);
+
+
+        $response = $this->actingAs($user)->delete('/webhook/'.$wh->id, ["Accepts" => "application/json"]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseCount( "webhooks", 0);
+
+    }
+
+    public function testCanNotDeleteWebhookThatIsNotOwned(){
+        $user = new UserWithWebhooks();
+        $wh = Webhook::factory()->createOne(['owner_id'=>"43", 'owner_type' => 'StarEditions\WebhookEvent\Tests\Fakes\UserWithWebhooks']);
+
+
+        $response = $this->actingAs($user)->delete('/webhook/'.$wh->id, ["Accepts" => "application/json"]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseCount( "webhooks", 1);
+    }
+
+    /**
+     * GET TESTS
+     * -------------
+     */
+    public function testGet(){
+        $user = new UserWithWebhooks();
+        $wh = Webhook::factory()->createOne(['owner_id'=>$user->id, 'owner_type' => 'StarEditions\WebhookEvent\Tests\Fakes\UserWithWebhooks']);
+
+        $response = $this->actingAs($user)->get('/webhook/'.$wh->id, ["Accepts" => "application/json"]);
+
+        $result = (new WebhookResource($wh))->toArray(new Request());
+
+        $response
+            ->assertStatus(200)
+            ->assertJson(["data"=>$result]);
+
+    }
+
+    public function testReturns404IfWebhookIsNotOwnedByRequestor(){
+        $user = new UserWithWebhooks();
+        $wh = Webhook::factory()->createOne(['owner_id'=>"43", 'owner_type' => 'StarEditions\WebhookEvent\Tests\Fakes\UserWithWebhooks']);
+
+        $response = $this->actingAs($user)->delete('/webhook/'.$wh->id, ["Accepts" => "application/json"]);
+        $response->assertStatus(404);
+    }
+
+    public function testGetForProvidedWebhookOwner(){
+        $user = new UserThatProvidesWebhookOwner();
+        $wh = Webhook::factory()->createOne(['owner_id'=>$user->getWebhookOwner()->id, 'owner_type' => 'StarEditions\WebhookEvent\Tests\Fakes\EntityWithWebhooks']);
+
+        $response = $this->actingAs($user)->get('/webhook/'.$wh->id, ["Accepts" => "application/json"]);
+
+        $result = (new WebhookResource($wh))->toArray(new Request());
+
+        $response
+            ->assertStatus(200)
+            ->assertJson(["data"=>$result]);
+    }
+
+    public function testGetReturns404IfNotFound(){
+        $user = new UserThatProvidesWebhookOwner();
+        $wh = Webhook::factory()->createOne(['owner_id'=>$user->getWebhookOwner()->id, 'owner_type' => 'StarEditions\WebhookEvent\Tests\Fakes\EntityWithWebhooks']);
+
+        $response = $this->actingAs($user)->get('/webhook/12', ["Accepts" => "application/json"]);
+        $response->assertStatus(404);
     }
 }

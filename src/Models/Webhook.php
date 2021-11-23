@@ -2,12 +2,15 @@
 
 namespace StarEditions\WebhookEvent\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use StarEditions\WebhookEvent\Database\Factories\WebhookFactory;
 
 class Webhook extends Model
 {
     use SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
         'owner_id',
@@ -60,5 +63,15 @@ class Webhook extends Model
         if($enabled !== null) {
             $query->where('enabled', $enabled);
         }
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    protected static function newFactory()
+    {
+        return WebhookFactory::new();
     }
 }

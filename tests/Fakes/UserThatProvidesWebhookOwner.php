@@ -22,6 +22,6 @@ class UserThatProvidesWebhookOwner extends BaseUser implements ProvidesWebhookOw
      */
     public function getWebhookOwner()
     {
-        return $this->entityWithWebhook();
+        return $this->entityWithWebhook;
     }
 }

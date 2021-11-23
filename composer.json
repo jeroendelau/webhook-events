@@ -18,7 +18,8 @@
     },
     "autoload": {
         "psr-4": {
-            "StarEditions\\WebhookEvent\\": "src"
+            "StarEditions\\WebhookEvent\\": "src",
+            "StarEditions\\WebhookEvent\\Database\\Factories\\": "src/database/factories/"
         }
     },
     "autoload-dev": {
