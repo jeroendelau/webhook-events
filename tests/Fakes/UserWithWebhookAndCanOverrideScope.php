@@ -13,9 +13,10 @@ class UserWithWebhookAndCanOverrideScope extends BaseUser implements MightOverWr
     public $id = 2;
     public $override = true;
 
-    public function setOverride($override)
+    public function setCanOverride($override)
     {
         $this->override = $override;
+        return $this;
     }
 
     public function canOverwriteScope()
