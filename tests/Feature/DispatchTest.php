@@ -49,7 +49,7 @@ class DispatchTest extends IntegrationTest
             ->dispatch();
 
         Bus::assertDispatched(CallWebhookJob::class);
-        $this->assertDatabaseCount(1, "webhook_dispatches");
+        $this->assertDatabaseCount("webhook_dispatches", 1);
     }
 
     public function testDispatchesToMultipleListener()
@@ -66,7 +66,7 @@ class DispatchTest extends IntegrationTest
             ->dispatch();
 
         Bus::assertDispatched(CallWebhookJob::class);
-        $this->assertDatabaseCount(2, "webhook_dispatches");
+        $this->assertDatabaseCount("webhook_dispatches", 2);
     }
 
     public function testDispatchesToWildCardScope()
@@ -82,7 +82,7 @@ class DispatchTest extends IntegrationTest
             ->dispatch();
 
         Bus::assertDispatched(CallWebhookJob::class);
-        $this->assertDatabaseCount(1, "webhook_dispatches");
+        $this->assertDatabaseCount("webhook_dispatches", 1);
     }
 
     public function testDispatchesToPartialScope()
@@ -98,7 +98,7 @@ class DispatchTest extends IntegrationTest
             ->dispatch();
 
         Bus::assertDispatched(CallWebhookJob::class);
-        $this->assertDatabaseCount(1, "webhook_dispatches");
+        $this->assertDatabaseCount("webhook_dispatches", 1);
     }
 
     protected function seedRegularListeners()
