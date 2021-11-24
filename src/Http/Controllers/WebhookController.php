@@ -4,6 +4,7 @@ namespace StarEditions\WebhookEvent\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use StarEditions\WebhookEvent\Models\Webhook;
 use StarEditions\WebhookEvent\Http\Resources\WebhookResource;
 use StarEditions\WebhookEvent\Http\Requests\WebhookRequest;
@@ -15,16 +16,17 @@ class WebhookController extends Controller
 {
     public function index(Request $request)
     {
-        if (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
+        $webhookOwner = Auth::user();
+        if(Auth::user() instanceof ProvidesWebhookOwner) {
+            if(!in_array(HasWebhooks::class, class_uses(Auth::user()->getWebhookOwner()))) {
+                abort(401, 'Access denied');
+            }
+            $webhookOwner = Auth::user()->getWebhookOwner();
+        }elseif (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
             abort(401, 'Access denied');
         }
-
         $query = Webhook::query();
-        if(Auth::user() instanceof ProvidesWebhookOwner) {
-            $query->webhookOwner(Auth::user()->getWebhookOwner());
-        }else {
-            $query->webhookOwner(Auth::user());
-        }
+        $query->webhookOwner($webhookOwner);
         $webhooks = $query->url($request->url)
         ->topic($request->topic)
         ->createdAt($request->created_at)
@@ -38,42 +40,73 @@ class WebhookController extends Controller
 
     public function store(WebhookRequest $request)
     {
-        if (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
+        $webhookOwner = Auth::user();
+        if(Auth::user() instanceof ProvidesWebhookOwner) {
+            if(!in_array(HasWebhooks::class, class_uses(Auth::user()->getWebhookOwner()))) {
+                abort(401, 'Access denied');
+            }
+            $webhookOwner = Auth::user()->getWebhookOwner();
+        }elseif (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
             abort(401, 'Access denied');
         }
+        if(!$this->checkUrl($request->url)) {
+            abort(422, 'URL does not exist.');
+        }
+
         $data = $request->validated();
-        if(!(Auth::user() instanceof MightOverWriteScope)) {
-            $data['scope'] = Auth::user()->getWebhookScope();
-        }elseif(Auth::user() instanceof MightOverWriteScope && !$request->has('scope')) {
-            $data['scope'] = Auth::user()->getWebhookScope();
+        $data['enabled'] = $request->has('enabled') ? $request->enabled : true;
+        if(!($webhookOwner instanceof MightOverWriteScope)) {
+            $data['scope'] = $webhookOwner->getWebhookScope();
+        }elseif($webhookOwner instanceof MightOverWriteScope && !$request->has('scope')) {
+            $data['scope'] = $webhookOwner->getWebhookScope();
         }
-        if((Auth::user() instanceof ProvidesWebhookOwner)) {
-            
-            $data['owner_id'] = Auth::user()->getWebhookOwner()->id;
-            $data['owner_type'] = get_class(Auth::user()->getWebhookOwner());
-        }else {
-            $data['owner_id'] = Auth::id();
-            $data['owner_type'] = get_class(Auth::user());
-        }
+
+        $data['owner_id'] = $webhookOwner->id;
+        $data['owner_type'] = get_class($webhookOwner);
         
-        Webhook::create($data);
-        return response()->json([
-            'status' => 'ok'
-        ]);
+        $webhook = Webhook::create($data);
+        return response(new WebhookResource($webhook));
     }
 
-    public function show(Webhook $webhook)
+    public function show($id)
     {
+        $webhookOwner = Auth::user();
+        if(Auth::user() instanceof ProvidesWebhookOwner) {
+            $webhookOwner = Auth::user()->getWebhookOwner();
+        }
+        $webhook = Webhook::where('id', $id)
+        ->where('owner_id', $webhookOwner->id)
+        ->where('owner_type', get_class($webhookOwner))
+        ->first();
+        if(!$webhook) {
+            return response()->json(['message' => 'Resource not found'], 404);
+        }
         return new WebhookResource($webhook);
     }
 
-    public function update(WebhookRequest $request, Webhook $webhook)
+    public function update(WebhookRequest $request, $id)
     {
+        $webhookOwner = Auth::user();
+        if(Auth::user() instanceof ProvidesWebhookOwner) {
+            if(!in_array(HasWebhooks::class, class_uses(Auth::user()->getWebhookOwner()))) {
+                abort(401, 'Access denied');
+            }
+            $webhookOwner = Auth::user()->getWebhookOwner();
+        }elseif (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
+            abort(401, 'Access denied');
+        }
+
+        if(!$this->checkUrl($request->url)) {
+            abort(422, 'URL does not exist.');
+        }
+
+        $webhook = Webhook::findOrFail($id);
         $data = $request->validated();
-        if(!(Auth::user() instanceof MightOverWriteScope)) {
-            $data['scope'] = Auth::user()->getWebhookScope();
-        }elseif(Auth::user() instanceof MightOverWriteScope && !$request->has('scope')) {
-            $data['scope'] = Auth::user()->getWebhookScope();
+        $data['enabled'] = $request->has('enabled') ? $request->enabled : true;
+        if(!($webhookOwner instanceof MightOverWriteScope)) {
+            $data['scope'] = $webhookOwner->getWebhookScope();
+        }elseif($webhookOwner instanceof MightOverWriteScope && !$request->has('scope')) {
+            $data['scope'] = $webhookOwner->getWebhookScope();
         }
         $webhook->update($data);
         return response()->json([
@@ -81,11 +114,33 @@ class WebhookController extends Controller
         ]);
     }
 
-    public function destroy(Webhook $webhook)
+    public function destroy($id)
     {
+        $webhookOwner = Auth::user();
+        if(Auth::user() instanceof ProvidesWebhookOwner) {
+            $webhookOwner = Auth::user()->getWebhookOwner();
+        }
+        $webhook = Webhook::where('id', $id)
+        ->where('owner_id', $webhookOwner->id)
+        ->where('owner_type', get_class($webhookOwner))
+        ->first();
+        if(!$webhook) {
+            return response()->json(['message' => 'Resource not found'], 404);
+        }
+
         $webhook->delete();
         return response()->json([
             'status' => 'ok'
         ]);
+    }
+
+    private function checkUrl($url)
+    {
+        try {
+            $response = Http::get($url);
+            return $response->successful();
+        } catch (\Throwable $th) {
+            return false;
+        }
     }
 }

@@ -8,13 +8,18 @@ use StarEditions\WebhookEvent\Http\Resources\WebhookDispatchResource;
 use StarEditions\WebhookEvent\Http\Resources\WebhookLogResource;
 use StarEditions\WebhookEvent\Models\WebhookDispatch;
 use StarEditions\WebhookEvent\HasWebhooks;
+use StarEditions\WebhookEvent\ProvidesWebhookOwner;
 
 class WebhookEventController extends Controller
 {
 
     public function index(Request $request)
     {
-        if (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
+        if(Auth::user() instanceof ProvidesWebhookOwner) {
+            if(!in_array(HasWebhooks::class, class_uses(Auth::user()->getWebhookOwner()))) {
+                abort(401, 'Access denied');
+            }
+        }elseif (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
             abort(401, 'Access denied');
         }
 
@@ -32,7 +37,11 @@ class WebhookEventController extends Controller
 
     public function show(WebhookDispatch $webhookDispatch)
     {
-        if (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
+        if(Auth::user() instanceof ProvidesWebhookOwner) {
+            if(!in_array(HasWebhooks::class, class_uses(Auth::user()->getWebhookOwner()))) {
+                abort(401, 'Access denied');
+            }
+        }elseif (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
             abort(401, 'Access denied');
         }
 
@@ -41,7 +50,11 @@ class WebhookEventController extends Controller
 
     public function log(WebhookDispatch $webhookDispatch)
     {
-        if (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
+        if(Auth::user() instanceof ProvidesWebhookOwner) {
+            if(!in_array(HasWebhooks::class, class_uses(Auth::user()->getWebhookOwner()))) {
+                abort(401, 'Access denied');
+            }
+        }elseif (!in_array(HasWebhooks::class, class_uses(Auth::user()))) {
             abort(401, 'Access denied');
         }
         
