@@ -18,8 +18,8 @@ class CreateWebhooksTable extends Migration
             $table->morphs('owner');
             $table->string('url');
             $table->string('topic');
-            $table->boolean('enabled')->default(false);
-            $table->string('scope');
+            $table->boolean('enabled')->default(true);
+            $table->string('scope')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
