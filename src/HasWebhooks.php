@@ -38,6 +38,6 @@ trait HasWebhooks
 
     public function webhooks()
     {
-        return $this->morphToMany(Webhook::class, 'owner');
+        return $this->morphMany(\StarEditions\WebhookEvent\Models\Webhook::class, 'owner');
     }
 }
