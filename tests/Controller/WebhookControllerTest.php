@@ -3,6 +3,8 @@
 namespace StarEditions\WebhookEvent\Tests\Controller;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use StarEditions\WebhookEvent\Http\Resources\WebhookResource;
 use StarEditions\WebhookEvent\Models\Webhook;
 use StarEditions\WebhookEvent\Tests\Fakes\UserThatProvidesWebhookOwner;
@@ -77,20 +79,20 @@ class WebhookControllerTest extends AbstractControllerTest
         $this->assertEquals("myscope",  (Webhook::first())->scope);
     }
 
-    // public function testScopeNotSetIfUserCantUpdateScope(){
-    //     $response = $this->actingAs(
-    //         (new UserWithWebhookAndCanOverrideScope())
-    //         ->setCanOverride(false))
-    //         ->post('/webhook', [
-    //             "url" => "https://www.example.com",
-    //             "topic" => "test/event",
-    //             "scope" => "myscope"
-    //         ], ["Accept" => "application/json"]);
+     public function testScopeNotSetIfUserCantUpdateScope(){
+         $response = $this->actingAs(
+             (new UserWithWebhookAndCanOverrideScope())
+             ->setCanOverride(false))
+             ->post('/webhook', [
+                 "url" => "https://www.example.com",
+                 "topic" => "test/event",
+                 "scope" => "myscope"
+             ], ["Accept" => "application/json"]);
 
-    //     $response->assertStatus(200);
+         $response->assertStatus(200);
 
-    //     $this->assertEquals("userwithwebhookandcanoverridescope.1",  (Webhook::first())->scope);
-    // }
+         $this->assertEquals("userwithwebhookandcanoverridescope.1",  (Webhook::first())->scope);
+     }
 
     public function testScopeForUserThatCanOverrideScopeSetToDefaultIfNotProvided(){
         $response = $this->actingAs((new UserWithWebhookAndCanOverrideScope()))
@@ -131,7 +133,7 @@ class WebhookControllerTest extends AbstractControllerTest
             ], ["Accept" => "application/json"]);
         $response->assertStatus(200);
         $this->assertDatabaseCount("webhooks", 1);
-        $this->assertCount(1, $user->getWebhookOwner()->webhooks);
+        //$this->assertCount(1, $user->getWebhookOwner()->webhooks);
         $this->assertEquals("entitywithwebhook.3",  (Webhook::first())->scope);
     }
 

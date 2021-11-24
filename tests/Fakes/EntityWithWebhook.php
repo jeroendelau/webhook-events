@@ -8,5 +8,5 @@ use StarEditions\WebhookEvent\HasWebhooks;
 class EntityWithWebhook extends Model
 {
     use HasWebhooks;
-    public $id = 3;
+    public $id = "3";
 }

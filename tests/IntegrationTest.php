@@ -2,11 +2,19 @@
 
 namespace StarEditions\WebhookEvent\Tests;
 
+use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Http;
 use Orchestra\Testbench\TestCase;
+use StarEditions\WebhookEvent\Tests\Fakes\TestClient;
 use StarEditions\WebhookEvent\Webhook;
 
 abstract class IntegrationTest extends TestCase
 {
+    /*
+     * @var TestClient
+     */
+    protected $testClient;
+
     /**
      * Setup the test case.
      *
@@ -17,6 +25,23 @@ abstract class IntegrationTest extends TestCase
         parent::setUp();
         $this->loadLaravelMigrations(['--database' => 'testbench']);
         $this->artisan('migrate', ['--database' => 'testbench'])->run();
+
+
+        // Copied from spatie package to control
+        // responses from webhooks
+        $this->testClient = new TestClient();
+
+        app()->bind(Client::class, function () {
+            return $this->testClient;
+        });
+
+        Http::fake([
+            // Stub a JSON response for GitHub endpoints...
+            'https://www.example.com' => Http::response(['foo' => 'bar'], 200),
+
+            // Stub a string response for Google endpoints...
+            'doesnotexist.com/*' => Http::response('Hello World', 500),
+        ]);
     }
 
     /**
