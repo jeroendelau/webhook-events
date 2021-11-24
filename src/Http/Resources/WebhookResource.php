@@ -19,6 +19,7 @@ class WebhookResource extends JsonResource
             'url' => $this->url,
             'topic' => $this->topic,
             'scope' => $this->scope,
+            'enabled' => $this->enabled,
             'createdAt' => $this->created_at
         ];
     }
