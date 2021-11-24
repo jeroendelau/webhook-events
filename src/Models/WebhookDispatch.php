@@ -16,7 +16,8 @@ class WebhookDispatch extends Model
     ];
 
     protected $casts = [
-        'payload' => 'json'
+        'payload' => 'json',
+        'success' => 'boolean'
     ];
 
     public function webhook()
