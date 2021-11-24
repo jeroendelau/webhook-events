@@ -77,7 +77,7 @@ class DispatchTest extends IntegrationTest
 
         WebhookEvent::create()
             ->topic("test/event")
-            ->scope("shop.3")
+            ->scope("*")
             ->payload(["foo" => "bar"])
             ->dispatch();
 
@@ -93,7 +93,7 @@ class DispatchTest extends IntegrationTest
 
         WebhookEvent::create()
             ->topic("test/event")
-            ->scope("shop.3")
+            ->scope("shop.*")
             ->payload(["foo" => "bar"])
             ->dispatch();
 
