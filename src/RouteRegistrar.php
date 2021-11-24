@@ -21,8 +21,26 @@ class RouteRegistrar
 
     public function forWebhooks()
     {
-        $this->router->resource('webhook', 'WebhookController')
-        ->only(['index', 'show', 'store', 'update', 'destroy']);
+        $this->router->get('webhook', [
+            'uses' => 'WebhookController@index',
+            'as' => 'webhook.index'
+        ]);
+        $this->router->post('webhook', [
+            'uses' => 'WebhookController@store',
+            'as' => 'webhook.store'
+        ]);
+        $this->router->get('webhook/{id}', [
+            'uses' => 'WebhookController@show',
+            'as' => 'webhook.show'
+        ]);
+        $this->router->put('webhook/{id}', [
+            'uses' => 'WebhookController@update',
+            'as' => 'webhook.update'
+        ]);
+        $this->router->delete('webhook/{id}', [
+            'uses' => 'WebhookController@destroy',
+            'as' => 'webhook.destroy'
+        ]);
     }
 
     public function forWebhookEvents()
