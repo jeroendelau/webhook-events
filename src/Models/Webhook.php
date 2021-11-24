@@ -21,6 +21,10 @@ class Webhook extends Model
         'scope'
     ];
 
+    protected $casts = [
+        'enabled' => 'boolean'
+    ];
+
     public function dispatches()
     {
         return $this->hasMany(WebhookDispatch::class);
