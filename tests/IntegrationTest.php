@@ -1,6 +1,6 @@
 <?php
 
-namespace Stareditions\WebhookEvent\Tests;
+namespace StarEditions\WebhookEvent\Tests;
 
 use Orchestra\Testbench\TestCase;
 use StarEditions\WebhookEvent\Webhook;
