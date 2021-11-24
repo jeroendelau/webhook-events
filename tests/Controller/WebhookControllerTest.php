@@ -80,18 +80,18 @@ class WebhookControllerTest extends AbstractControllerTest
     }
 
      public function testScopeNotSetIfUserCantUpdateScope(){
-         $response = $this->actingAs(
-             (new UserWithWebhookAndCanOverrideScope())
-             ->setCanOverride(false))
-             ->post('/webhook', [
-                 "url" => "https://www.example.com",
-                 "topic" => "test/event",
-                 "scope" => "myscope"
-             ], ["Accept" => "application/json"]);
+        $response = $this->actingAs(
+            (new UserWithWebhookAndCanOverrideScope())
+            ->setCanOverride(false))
+            ->post('/webhook', [
+                "url" => "https://www.example.com",
+                "topic" => "test/event",
+                "scope" => "myscope"
+            ], ["Accept" => "application/json"]);
 
-         $response->assertStatus(200);
-
-         $this->assertEquals("userwithwebhookandcanoverridescope.1",  (Webhook::first())->scope);
+        $response->assertStatus(200);
+        // The ID is set to 2 in the class
+        $this->assertEquals("userwithwebhookandcanoverridescope.2",  (Webhook::first())->scope);
      }
 
     public function testScopeForUserThatCanOverrideScopeSetToDefaultIfNotProvided(){
