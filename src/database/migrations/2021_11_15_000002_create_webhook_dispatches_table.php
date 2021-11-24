@@ -22,7 +22,7 @@ class CreateWebhookDispatchesTable extends Migration
             ->cascadeOnUpdate();
             $table->string('topic');
             $table->json('payload');
-            $table->timestamp('last_attempt');
+            $table->timestamp('last_attempt')->nullable();
             $table->boolean('success')->default(false);
             $table->unsignedInteger('attempts')->default(0);
             $table->timestamps();
