@@ -2,6 +2,7 @@
 
 namespace StarEditions\WebhookEvent\Facades;
 
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Facade;
 use Spatie\WebhookServer\WebhookCall;
@@ -9,6 +10,8 @@ use StarEditions\WebhookEvent\MightOverWriteScope;
 use StarEditions\WebhookEvent\Models\Webhook;
 use StarEditions\WebhookEvent\Models\WebhookDispatch;
 use StarEditions\WebhookEvent\ProvidesWebhookOwner;
+
+use function PHPUnit\Framework\throwException;
 
 class WebhookEvent extends Facade
 {
@@ -50,8 +53,19 @@ class WebhookEvent extends Facade
 
     public function dispatch()
     {
-        $webhooks = Webhook::where('scope', $this->scope)
-        ->topic($this->topic)
+        if(!in_array($this->topic, config('webhook-events-server.topics'))) {
+            throw new Exception("Topic does not exist!");
+        }
+        $query = Webhook::query();
+        if($this->scope !== '*') {
+            $scope = explode('.', $this->scope);
+            if($scope[1] === '*') {
+                $query->where('scope', 'like', "{$scope[0]}.%");
+            }else {
+                $query->where('scope', $this->scope);
+            }
+        }
+        $webhooks = $query->topic($this->topic)
         ->where('enabled', 1)
         ->get();
 
