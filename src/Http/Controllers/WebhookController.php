@@ -59,6 +59,8 @@ class WebhookController extends Controller
             $data['scope'] = $webhookOwner->getWebhookScope();
         }elseif($webhookOwner instanceof MightOverWriteScope && !$request->has('scope')) {
             $data['scope'] = $webhookOwner->getWebhookScope();
+        }elseif($webhookOwner instanceof MightOverWriteScope && !$webhookOwner->canOverwriteScope()) {
+            $data['scope'] = $webhookOwner->getWebhookScope();
         }
 
         $data['owner_id'] = $webhookOwner->id;
@@ -106,6 +108,8 @@ class WebhookController extends Controller
         if(!($webhookOwner instanceof MightOverWriteScope)) {
             $data['scope'] = $webhookOwner->getWebhookScope();
         }elseif($webhookOwner instanceof MightOverWriteScope && !$request->has('scope')) {
+            $data['scope'] = $webhookOwner->getWebhookScope();
+        }elseif($webhookOwner instanceof MightOverWriteScope && !$webhookOwner->canOverwriteScope()) {
             $data['scope'] = $webhookOwner->getWebhookScope();
         }
         $webhook->update($data);
