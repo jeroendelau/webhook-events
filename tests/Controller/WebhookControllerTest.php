@@ -130,7 +130,6 @@ class WebhookControllerTest extends AbstractControllerTest
                 "topic" => "test/event",
             ], ["Accept" => "application/json"]);
         $response->assertStatus(200);
-
         $this->assertDatabaseCount("webhooks", 1);
         $this->assertCount(1, $user->getWebhookOwner()->webhooks);
         $this->assertEquals("entitywithwebhook.3",  (Webhook::first())->scope);
@@ -215,7 +214,12 @@ class WebhookControllerTest extends AbstractControllerTest
         $response = $this->actingAs($user)->delete('/webhook/'.$wh->id, ["Accept" => "application/json"]);
 
         $response->assertStatus(200);
-        $this->assertDatabaseCount( "webhooks", 0);
+        /**
+         * assertDatabaseCount will always return 1
+         * because the webhook still exist in database but with soft delete
+         */
+        $count = Webhook::count();
+        $this->assertEquals($count, 0);
 
     }
 
